@@ -5,51 +5,31 @@ import java.math.*;
 *
 * */
 public class Particle {
-
-    // Coordinates
-    private final double currentX;
-    private final double currentY;
-
     // Interaction radius with other particles
     private final double radius;
 
     // Particle velocity (should be) 0.03
     private final double velocity;
 
-    // Angle which the particle faces
-    private final double thetaAngle;
+    // Spatial data for the Particle
+    private final SpatialCoordinates spatialCoordinates;
 
-    // This would be the LxL to check for bounds
-    private final double accessibleArea;
-
-
-    public Particle(final double currentX,
-                    final double currentY,
-                    final double radius,
-                    final double velocity,
-                    final double thetaAngle,
-                    final double accessibleArea) {
-        this.currentX = currentX;
-        this.currentY = currentY;
+    public Particle( double currentX,
+                     double currentY,
+                     double radius,
+                     double velocity,
+                     double thetaAngle,
+                     double accessibleArea ) {
         this.radius = radius;
         this.velocity = velocity;
-        this.thetaAngle = thetaAngle;
-        this.accessibleArea = accessibleArea;
+        this.spatialCoordinates = new SpatialCoordinates(currentX, currentY, thetaAngle, accessibleArea);
     }
 
     public void updatePosition() {
-        
+
     }
 
     /*Getters*/
-    public double getCurrentX() {
-        return currentX;
-    }
-
-    public double getCurrentY() {
-        return currentY;
-    }
-
     public double getRadius() {
         return radius;
     }
@@ -58,11 +38,7 @@ public class Particle {
         return velocity;
     }
 
-    public double getThetaAngle() {
-        return thetaAngle;
-    }
-
-    public double getAccessibleArea() {
-        return accessibleArea;
+    public SpatialCoordinates getSpatialCoordinates() {
+        return spatialCoordinates;
     }
 }
