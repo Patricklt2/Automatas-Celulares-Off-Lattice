@@ -11,8 +11,15 @@ public class Particle {
     // Particle velocity (should be) 0.03
     private final double velocity;
 
-    // Spatial data for the Particle
-    private final SpatialCoordinates spatialCoordinates;
+    // Particle coordinates
+    private double currentX;
+    private double currentY;
+
+    // Particle Theta angle
+    private double thetaAngle;
+
+    // side L of the LxL space
+    private final double sideL;
 
     public Particle( double currentX,
                      double currentY,
@@ -22,11 +29,16 @@ public class Particle {
                      double accessibleArea ) {
         this.radius = radius;
         this.velocity = velocity;
-        this.spatialCoordinates = new SpatialCoordinates(currentX, currentY, thetaAngle, accessibleArea);
+        this.currentX = currentX;
+        this.currentY = currentY;
+        this.thetaAngle = thetaAngle;
+        this.sideL = Math.sqrt(accessibleArea); // check!!!
     }
 
-    public void updatePosition() {
-
+    public void updatePosition( double newX, double newY, double newThetaAngle ) {
+        this.currentX = newX;
+        this.currentY = newY;
+        this.thetaAngle = newThetaAngle;
     }
 
     /*Getters*/
@@ -38,7 +50,16 @@ public class Particle {
         return velocity;
     }
 
-    public SpatialCoordinates getSpatialCoordinates() {
-        return spatialCoordinates;
+    public double getCurrentX() {
+        return currentX;
     }
+
+    public double getCurrentY() {
+        return currentY;
+    }
+
+    public double getThetaAngle() {
+        return thetaAngle;
+    }
+
 }
