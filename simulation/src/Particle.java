@@ -9,16 +9,16 @@ public class Particle {
     private final double velocity;
 
     // Particle coordinates
-    private double currentX;
-    private double currentY;
+    private final double currentX;
+    private final double currentY;
 
     // Particle Theta angle
-    private double thetaAngle;
+    private final double thetaAngle;
 
     private final int id;
 
     // Starts with no neighbors
-    private List<Particle> neighbors = new ArrayList<>();
+    private final List<Particle> neighbors = new ArrayList<>();
 
     public Particle( double currentX,
                      double currentY,
@@ -32,12 +32,6 @@ public class Particle {
         this.thetaAngle = thetaAngle;
         this.id = id;
         this.neighbors.add(this);
-    }
-
-    public void updatePosition( double newX, double newY, double newThetaAngle ) {
-        this.currentX = newX;
-        this.currentY = newY;
-        this.thetaAngle = newThetaAngle;
     }
 
     public double getVelocity() {
