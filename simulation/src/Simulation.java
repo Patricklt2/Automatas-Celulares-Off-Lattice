@@ -25,9 +25,13 @@ public class Simulation {
     private int M;
     private double noise;
     private String filePath;
+    private double density;
 
     public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu, String filePath) {
         resetVariables(N, timeStep, maxIterations, L, radius, nu, filePath);
+
+        // write initial position and angle into file
+        writeParticleDataToFile(filePath, 0, particles);
     }
     
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
@@ -42,7 +46,15 @@ public class Simulation {
                 );
                 writer.newLine();
             }
+            writer.write("polarization:" + calculatePolarization() + "\n");
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void writeDataToFile(String fileName, String data) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(data);
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -59,9 +71,6 @@ public class Simulation {
             Particle particle = new Particle(currentX, currentY, velocity, thetaAngle, i);
             particles.add(particle);
         }
-
-        // write initial position and angle into file
-        writeParticleDataToFile(filePath, 0, particles);
 
         return particles;
     }
@@ -146,11 +155,25 @@ public class Simulation {
         writeParticleDataToFile(filePath, iteration, particles); 
     }
 
+    private double calculatePolarization() {
+        // sum of velocity components for each particle
+        double velocityX = 0.0;
+        double velocityY = 0.0;
+        for(Particle particle : particles) {
+            velocityX += particle.getVelocity() * Math.cos(particle.getThetaAngle());
+            velocityY += particle.getVelocity() * Math.sin(particle.getThetaAngle());   
+        }
+        // calculate the magnitude of the composite velocity vector
+        double magnitude = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+        return ((magnitude) / (N * particles.getFirst().getVelocity()));
+    }
+
     public void runSimulation() {
         for (int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
         }
+        writeDataToFile(filePath, String.format("density:%.3f\n", density));
     }
 
     public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu, String filePath) {
@@ -162,6 +185,7 @@ public class Simulation {
         this.M = (int) Math.floor((double)L / rc);
         this.noise = -nu / 2 + new Random().nextDouble() * nu;
         this.filePath = filePath;
+        this.density = (double) N / (L * L);
         this.particles = generateParticles();
     }
 
@@ -176,8 +200,7 @@ public class Simulation {
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
-            if (!(obj instanceof Cell)) return false;
-            Cell cell = (Cell) obj;
+            if (!(obj instanceof Cell cell)) return false;
             return x == cell.x && y == cell.y;
         }
 
