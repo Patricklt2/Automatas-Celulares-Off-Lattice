@@ -1,13 +1,10 @@
-import java.math.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
 * Models each Particle
-*
 * */
 public class Particle {
-    // Interaction radius with other particles
-    private final double radius;
-
     // Particle velocity (should be) 0.03
     private final double velocity;
 
@@ -18,32 +15,29 @@ public class Particle {
     // Particle Theta angle
     private double thetaAngle;
 
-    // side L of the LxL space
-    private final double sideL;
+    private final int id;
+
+    // Starts with no neighbors
+    private List<Particle> neighbors = new ArrayList<>();
 
     public Particle( double currentX,
                      double currentY,
-                     double radius,
                      double velocity,
                      double thetaAngle,
-                     double accessibleArea ) {
-        this.radius = radius;
+                     int id
+                     ) {
         this.velocity = velocity;
         this.currentX = currentX;
         this.currentY = currentY;
         this.thetaAngle = thetaAngle;
-        this.sideL = Math.sqrt(accessibleArea); // check!!!
+        this.id = id;
+        this.neighbors.add(this);
     }
 
     public void updatePosition( double newX, double newY, double newThetaAngle ) {
         this.currentX = newX;
         this.currentY = newY;
         this.thetaAngle = newThetaAngle;
-    }
-
-    /*Getters*/
-    public double getRadius() {
-        return radius;
     }
 
     public double getVelocity() {
@@ -62,4 +56,15 @@ public class Particle {
         return thetaAngle;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public List<Particle> getNeighbors() {
+        return neighbors;
+    }
+
+    public void addNeighbor(Particle neighbor) {
+        neighbors.add(neighbor);
+    }
 }
