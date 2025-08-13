@@ -138,9 +138,9 @@ public class Simulation {
                 sinSum += Math.sin(neighbor.getThetaAngle());
             }
 
-            // new position calculation
-            double newX = particle.getCurrentX() + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep;
-            double newY = particle.getCurrentY() + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep;
+
+            double newX = (particle.getCurrentX() + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep)%L;
+            double newY = (particle.getCurrentY() + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep)%L;
 
             // average theta calculation in radians
             double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
