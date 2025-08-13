@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
@@ -23,7 +22,7 @@ public class Simulation {
     private int L;
     private double rc;  //interaction radius for all particles
     private int M;
-    private double noise;
+    private double nu;
     private String filePath;
     private double density;
 
@@ -65,9 +64,9 @@ public class Simulation {
         final double velocity = 0.03;
 
         for (int i = 0; i < N; i++) {
-            double currentX = Math.random() * L; // Random X position within L
-            double currentY = Math.random() * L; // Random Y position within L
-            double thetaAngle = Math.toRadians(Math.random() * 360);  // randomize 0 to 360 degrees
+            double currentX = new Random().nextDouble() * L; // Random X position within L
+            double currentY = new Random().nextDouble() * L; // Random Y position within L
+            double thetaAngle = Math.toRadians(new Random().nextDouble() * 360);  // randomize 0 to 360 degrees
             Particle particle = new Particle(currentX, currentY, velocity, thetaAngle, i);
             particles.add(particle);
         }
@@ -133,18 +132,19 @@ public class Simulation {
             List<Particle> neighbors = particle.getNeighbors();
             double cosSum = 0;
             double sinSum = 0;
+            double noise = (Math.random() - 0.5) * this.nu;
             for(Particle neighbor: neighbors){
                 cosSum += Math.cos(neighbor.getThetaAngle());
                 sinSum += Math.sin(neighbor.getThetaAngle());
             }
 
+            // new position calculation
+            double newX = particle.getCurrentX() + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep;
+            double newY = particle.getCurrentY() + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep;
+
             // average theta calculation in radians
             double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
             double newThetaAngle = averageTheta + noise;
-
-            // new position calculation
-            double newX = particle.getCurrentX() + particle.getVelocity() * Math.cos(newThetaAngle) * timeStep;
-            double newY = particle.getCurrentY() + particle.getVelocity() * Math.sin(newThetaAngle) * timeStep;
 
             // particle with updated position and angle
             Particle updatedParticle = new Particle(newX, newY, particle.getVelocity(), newThetaAngle, particle.getId());
@@ -183,7 +183,7 @@ public class Simulation {
         this.L = L;
         this.rc = 2 * radius;
         this.M = (int) Math.floor((double)L / rc);
-        this.noise = -nu / 2 + new Random().nextDouble() * nu;
+        this.nu = nu;
         this.filePath = filePath;
         this.density = (double) N / (L * L);
         this.particles = generateParticles();
