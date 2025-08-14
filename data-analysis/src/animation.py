@@ -60,7 +60,14 @@ def leer_frames(filename):
         if frame_data:
             yield (t_actual, frame_data)
 
+"""
+Un mini ejemplo de que es con lo que testie que funcione.
+def main():
+    gen = leer_frames("particle_test11.txt")  # Replace with your actual data file
 
+    for t_actual, frame_data in gen:
+        print(f"Time: {t_actual}, Particles: {frame_data}")
+"""
 
 def main():
     p = argparse.ArgumentParser()
