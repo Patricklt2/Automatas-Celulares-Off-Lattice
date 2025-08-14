@@ -116,29 +116,39 @@ def main():
 #We should frontify this function xD
 def main():
     gen = leer_frames("final_particle_test694206942069420.txt")
-    L = 10
-
+    L = 25 # L could be added as a file header
+           # N could also be added as a file header 
+    
     fig, ax = plt.subplots()
     ax.set_xlim(0, L)   # Bounds will always be 0 to L
     ax.set_ylim(0, L)
-    scat = ax.scatter([], [])
 
+    # Get first frame to know number of particles  # Small patch until we have a header
+    first_frame = next(gen)
+    N = len(first_frame)
 
-    # Initialize scatterplot with empty offsets
+    xy = np.array([[p.x, p.y] for p in first_frame])
+    dx = np.array([np.cos(p.theta) for p in first_frame])
+    dy = np.array([np.sin(p.theta) for p in first_frame])
+
+    # Initialize first frame 
+    quiv = ax.quiver(xy[:,0], xy[:,1], dx, dy, angles='xy', scale_units='xy', scale=1, color='black', width=0.005)
+
     def init_animation():
-        scat.set_offsets(np.empty((0, 2)))
-        return scat,
+        return quiv,
 
-    #The updater, uses the values from the generator to update
-    def update_animation(particles): 
+    def update_animation(particles):
         xy = np.array([[p.x, p.y] for p in particles])
-        scat.set_offsets(xy)
-        return scat,
+        dx = np.array([np.cos(p.theta) for p in particles])
+        dy = np.array([np.sin(p.theta) for p in particles])
+
+        quiv.set_offsets(xy)
+        quiv.set_UVC(dx, dy)
+        return quiv,
 
     ani = FuncAnimation(
         fig, update_animation, frames=gen,
-        init_func=init_animation, blit=False, interval=50
-    )
+        init_func=init_animation, blit=False, interval=50)
 
     plt.show()
 
