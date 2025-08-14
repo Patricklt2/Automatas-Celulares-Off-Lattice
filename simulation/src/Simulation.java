@@ -36,7 +36,7 @@ public class Simulation {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
             for (Particle particle : particles) {
-                writer.write(String.format("%d;%.5f;%.5f;%.5f",
+                writer.write(String.format("%d;%.6f;%.6f;%.6f",
                         particle.getId(),
                         particle.getCurrentX(),
                         particle.getCurrentY(),

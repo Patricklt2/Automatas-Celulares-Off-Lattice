@@ -28,35 +28,37 @@ class Particle:
 
 # ---------- Utilities ----------
 
-hdr = re.compile(r"^\s*t\s*=\s*(\d+)\s*$")  # detecta líneas tipo t=0, t = 2, etc.
+hdr = re.compile(r"^\s*t\s*:\s*\d+")
+hdr_polarization = re.compile(r"^\s*polarization\s*:\s*([\d.,]+)\s*$")
+hdr_density = re.compile(r"^\s*density\s*:\s*([\d.,]+)\s*$")
 
 def leer_frames(filename):
     with open(filename) as f:
         frame_data = []   # List for actual frame
         t_actual = None
-
         for line in f:
             line = line.strip()
-            if not line:
+            if not line or hdr_polarization.match(line) or hdr_density.match(line):
                 continue
 
             m = hdr.match(line)
             if m: # heading
                 if frame_data:
-                    yield t_actual, frame_data
+                    yield (t_actual, frame_data)
                     frame_data = [] 
-                t_actual = float(m.group(1))
+                t_actual = float(m.group(0).split(':')[1].strip())
             else:
                 # id, x, y, theta
-                parts = line.split()
+                parts = line.split(';')
                 if len(parts) >= 4:
                     id, sx, sy, stheta = parts
-                    p = Particle(float(sx), float(sy), 0.0, float(stheta), int(id))
+                    #Lets fix the decimal comma issue in the simulation output
+                    p = Particle(float(sx.replace(',', '.')), float(sy.replace(',', '.')), 0.03, float(stheta.replace(',', '.')), int(id))
                     frame_data.append(p)
 
         # last frame of the file
         if frame_data:
-            yield t_actual, frame_data
+            yield (t_actual, frame_data)
 
 
 
