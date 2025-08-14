@@ -11,6 +11,7 @@ import java.util.Random;
 
 /*
 * Models each simulation
+* 
 * */
 
 public class Simulation {
@@ -22,16 +23,24 @@ public class Simulation {
     private double rc; // interaction radius for all particles
     private int M;
     private double nu;
-    private String filePath;
     private double density;
 
-    public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu, String filePath) {
-        resetVariables(N, timeStep, maxIterations, L, radius, nu, filePath);
-
-        // write initial position and angle into file
-        writeParticleDataToFile(filePath, 0, particles);
+    public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
+        resetVariables(N, timeStep, maxIterations, L, radius, nu);
     }
 
+    public void setDensity(double density){
+        this.density = density;
+    }
+
+    public void setL(int L){
+        this.L = N;
+    }
+
+    public void setNu(double nu){
+        this.nu = nu;
+    }
+    
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
@@ -124,9 +133,9 @@ public class Simulation {
         }
     }
 
-    private void updatePositions(int iteration) {
+    private void updatePositions(int iteration){
         List<Particle> updatedParticlesPositions = new ArrayList<>(N);
-        for (Particle particle : particles) {
+        for(Particle particle: particles) {
             List<Particle> neighbors = particle.getNeighbors();
             double cosSum = 0;
             double sinSum = 0;
@@ -134,7 +143,7 @@ public class Simulation {
             // Delta Theta is a random number chosen with a uniform probability from the
             // interval [—theta/2, theta/2].
             double noise = (Math.random() - 0.5) * this.nu;
-            for (Particle neighbor : neighbors) {
+            for(Particle neighbor: neighbors){
                 cosSum += Math.cos(neighbor.getThetaAngle());
                 sinSum += Math.sin(neighbor.getThetaAngle());
             }
@@ -154,46 +163,63 @@ public class Simulation {
             double newThetaAngle = averageTheta + noise;
 
             // particle with updated position and angle
-            Particle updatedParticle = new Particle(newX, newY, particle.getVelocity(), newThetaAngle,
-                    particle.getId());
+            Particle updatedParticle = new Particle(newX, newY, particle.getVelocity(), newThetaAngle, particle.getId());
             updatedParticlesPositions.add(updatedParticle);
         }
         particles = updatedParticlesPositions;
-        // write new positions and angle into file
-        writeParticleDataToFile(filePath, iteration, particles);
     }
 
     private double calculatePolarization() {
         // sum of velocity components for each particle
         double velocityX = 0.0;
         double velocityY = 0.0;
-        for (Particle particle : particles) {
+        for(Particle particle : particles) {
             velocityX += particle.getVelocity() * Math.cos(particle.getThetaAngle());
-            velocityY += particle.getVelocity() * Math.sin(particle.getThetaAngle());
+            velocityY += particle.getVelocity() * Math.sin(particle.getThetaAngle());   
         }
         // calculate the magnitude of the composite velocity vector
         double magnitude = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
         return ((magnitude) / (N * particles.getFirst().getVelocity()));
     }
 
-    public void runSimulation() {
-        for (int i = 1; i <= maxIterations; i++) {
+    public void runSimulationForAnimation(String filePath) {
+        writeParticleDataToFile(filePath, 0, particles);
+        for (int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
+            writeParticleDataToFile(filePath, i, particles);
         }
         writeDataToFile(filePath, String.format("density:%.3f\n", density));
     }
 
-    public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu,
-            String filePath) {
+    public void runSimulationForPolarization(String filePath, double nu) {
+        setNu(nu);
+        for(int i = 1; i <= maxIterations; i++){
+            findNeighbors();
+            updatePositions(i);
+        }
+        writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), nu));
+    }
+
+    // todo no entiendo lo que tengo que plottear, esto está mal
+    // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
+    public void runSimulationForDensity(String filePath, int N){
+        setDensity((double) N /L);
+        for(int i = 1; i <= maxIterations; i++){
+            findNeighbors();
+            updatePositions(i);
+        }
+        writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));
+    }
+
+    public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
         this.N = N;
         this.timeStep = timeStep;
         this.maxIterations = maxIterations;
         this.L = L;
         this.rc = 2 * radius;
-        this.M = (int) Math.floor((double) L / rc);
+        this.M = (int) Math.floor((double)L / rc);
         this.nu = nu;
-        this.filePath = filePath;
         this.density = (double) N / (L * L);
         this.particles = generateParticles();
     }
@@ -224,7 +250,7 @@ public class Simulation {
 
 /*
  * Structure of the simulation:
- * t1
+ * t1 
  * 1 x y theta
  * ...
  * ..
