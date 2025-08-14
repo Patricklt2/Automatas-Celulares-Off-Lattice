@@ -23,14 +23,22 @@ public class Simulation {
     private double rc;  //interaction radius for all particles
     private int M;
     private double nu;
-    private String filePath;
     private double density;
 
-    public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu, String filePath) {
-        resetVariables(N, timeStep, maxIterations, L, radius, nu, filePath);
+    public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
+        resetVariables(N, timeStep, maxIterations, L, radius, nu);
+    }
 
-        // write initial position and angle into file
-        writeParticleDataToFile(filePath, 0, particles);
+    public void setDensity(double density){
+        this.density = density;
+    }
+
+    public void setL(int L){
+        this.L = N;
+    }
+
+    public void setNu(double nu){
+        this.nu = nu;
     }
     
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
@@ -151,8 +159,6 @@ public class Simulation {
             updatedParticlesPositions.add(updatedParticle);
         }
         particles = updatedParticlesPositions;
-        // write new positions and angle into file
-        writeParticleDataToFile(filePath, iteration, particles); 
     }
 
     private double calculatePolarization() {
@@ -168,15 +174,37 @@ public class Simulation {
         return ((magnitude) / (N * particles.getFirst().getVelocity()));
     }
 
-    public void runSimulation() {
+    public void runSimulationForAnimation(String filePath) {
+        writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
+            writeParticleDataToFile(filePath, i, particles);
         }
         writeDataToFile(filePath, String.format("density:%.3f\n", density));
     }
 
-    public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu, String filePath) {
+    public void runSimulationForPolarization(String filePath, double nu) {
+        setNu(nu);
+        for(int i = 1; i <= maxIterations; i++){
+            findNeighbors();
+            updatePositions(i);
+        }
+        writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), nu));
+    }
+
+    // todo no entiendo lo que tengo que plottear, esto está mal
+    // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
+    public void runSimulationForDensity(String filePath, int N){
+        setDensity((double) N /L);
+        for(int i = 1; i <= maxIterations; i++){
+            findNeighbors();
+            updatePositions(i);
+        }
+        writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));
+    }
+
+    public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
         this.N = N;
         this.timeStep = timeStep;
         this.maxIterations = maxIterations;
@@ -184,7 +212,6 @@ public class Simulation {
         this.rc = 2 * radius;
         this.M = (int) Math.floor((double)L / rc);
         this.nu = nu;
-        this.filePath = filePath;
         this.density = (double) N / (L * L);
         this.particles = generateParticles();
     }

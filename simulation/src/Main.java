@@ -4,7 +4,7 @@
 * */
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(400, 1, 100, 10, 1, 0.1, "fig2a-2.txt");
+        Simulation sim = new Simulation(4000, 1, 100, 31, 1, 0.1);
 
         /*
         * Tested with:
@@ -14,11 +14,21 @@ public class Main {
         * TODO: WITH 300 1 100 25 1 0.1 , THE VALUES OSCILATE A LOT even with modulo fix
         *
         * for fig2a:
-        * N = 400 , step = 1 , macIter = 100 , L = 10 , r = 1 , nu = 5     -> va -> 0
+        * N = 400 , step = 1 , maxIter = 100 , L = 10 , r = 1 , nu = 5     -> va -> 0
         *
         * for fig2a-2:
-        * N = 400 , step = 1 , macIter = 100 , L = 10 , r = 1 , nu = 0,1     -> va -> 1
+        * N = 400 , step = 1 , maxIter = 100 , L = 10 , r = 1 , nu = 0,1     -> va -> 1
         * */
-        sim.runSimulation();
+        // sim.runSimulationForAnimation("hola.txt");
+
+        for(double nu = 5; nu > 0; nu-=0.1 ){
+            sim.runSimulationForPolarization("polarization.txt", nu);
+        }
+
+        /*sim.setNu(0.1);
+        sim.setL(20);
+        for(int N = 0; N < 200; N += 10){
+            sim.runSimulationForDensity("density.txt", N);
+        }*/
     }
 }
