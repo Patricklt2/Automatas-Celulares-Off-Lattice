@@ -44,7 +44,7 @@ def leer_frames(filename):
             m = hdr.match(line)
             if m: # heading
                 if frame_data:
-                    yield (t_actual, frame_data)
+                    yield (frame_data)
                     frame_data = [] 
                 t_actual = float(m.group(0).split(':')[1].strip())
             else:
@@ -58,7 +58,7 @@ def leer_frames(filename):
 
         # last frame of the file
         if frame_data:
-            yield (t_actual, frame_data)
+            yield (frame_data)
 
 """
 Un mini ejemplo de que es con lo que testie que funcione.
@@ -69,6 +69,7 @@ def main():
         print(f"Time: {t_actual}, Particles: {frame_data}")
 """
 
+"""
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--input", "-i", required=True, help="Path to fig2a-2.txt")
@@ -110,6 +111,36 @@ def main():
     else:
         save_animation(anim, args.out, fps=args.fps, format_=args.save)
         print(f"Saved animation to {args.out}")
+"""
+
+#We should frontify this function xD
+def main():
+    gen = leer_frames("final_particle_test694206942069420.txt")
+    L = 10
+
+    fig, ax = plt.subplots()
+    ax.set_xlim(0, L)   # Bounds will always be 0 to L
+    ax.set_ylim(0, L)
+    scat = ax.scatter([], [])
+
+
+    # Initialize scatterplot with empty offsets
+    def init_animation():
+        scat.set_offsets(np.empty((0, 2)))
+        return scat,
+
+    #The updater, uses the values from the generator to update
+    def update_animation(particles): 
+        xy = np.array([[p.x, p.y] for p in particles])
+        scat.set_offsets(xy)
+        return scat,
+
+    ani = FuncAnimation(
+        fig, update_animation, frames=gen,
+        init_func=init_animation, blit=False, interval=50
+    )
+
+    plt.show()
 
 
 if __name__ == "__main__":
