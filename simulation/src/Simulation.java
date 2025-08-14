@@ -20,7 +20,7 @@ public class Simulation {
     private double timeStep;
     private int maxIterations;
     private int L;
-    private double rc;  //interaction radius for all particles
+    private double rc; // interaction radius for all particles
     private int M;
     private double nu;
     private double density;
@@ -45,16 +45,15 @@ public class Simulation {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
             for (Particle particle : particles) {
-                writer.write(String.format("%d;%.5f;%.5f;%.5f",
+                writer.write(String.format("%d;%.6f;%.6f;%.6f",
                         particle.getId(),
                         particle.getCurrentX(),
                         particle.getCurrentY(),
-                        particle.getThetaAngle())
-                );
+                        particle.getThetaAngle()));
                 writer.newLine();
             }
             writer.write("polarization:" + calculatePolarization() + "\n");
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -62,7 +61,7 @@ public class Simulation {
     private void writeDataToFile(String fileName, String data) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write(data);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -74,7 +73,7 @@ public class Simulation {
         for (int i = 0; i < N; i++) {
             double currentX = new Random().nextDouble() * L; // Random X position within L
             double currentY = new Random().nextDouble() * L; // Random Y position within L
-            double thetaAngle = Math.toRadians(new Random().nextDouble() * 360);  // randomize 0 to 360 degrees
+            double thetaAngle = Math.toRadians(new Random().nextDouble() * 360); // randomize 0 to 360 degrees
             Particle particle = new Particle(currentX, currentY, velocity, thetaAngle, i);
             particles.add(particle);
         }
@@ -140,15 +139,24 @@ public class Simulation {
             List<Particle> neighbors = particle.getNeighbors();
             double cosSum = 0;
             double sinSum = 0;
+
+            // Delta Theta is a random number chosen with a uniform probability from the
+            // interval [—theta/2, theta/2].
             double noise = (Math.random() - 0.5) * this.nu;
             for(Particle neighbor: neighbors){
                 cosSum += Math.cos(neighbor.getThetaAngle());
                 sinSum += Math.sin(neighbor.getThetaAngle());
             }
 
+            double newX = (particle.getCurrentX()
+                    + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep) % L;
+            double newY = (particle.getCurrentY()
+                    + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep) % L;
 
-            double newX = (particle.getCurrentX() + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep)%L;
-            double newY = (particle.getCurrentY() + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep)%L;
+            if (newX < 0)
+                newX += L;
+            if (newY < 0)
+                newY += L;
 
             // average theta calculation in radians
             double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
@@ -226,8 +234,10 @@ public class Simulation {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (!(obj instanceof Cell cell)) return false;
+            if (this == obj)
+                return true;
+            if (!(obj instanceof Cell cell))
+                return false;
             return x == cell.x && y == cell.y;
         }
 
