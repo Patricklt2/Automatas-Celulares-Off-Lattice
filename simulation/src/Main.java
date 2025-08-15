@@ -4,7 +4,7 @@
 * */
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(300, 1, 100, 5, 1, 0.1);
+        Simulation sim = new Simulation(400, 1, 2000, 10, 1, 2);
         //sim.runSimulationForAnimation("hola.txt");
         /*
         * Tested with:
