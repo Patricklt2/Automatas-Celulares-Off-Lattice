@@ -115,7 +115,7 @@ def main():
 
 #We should frontify this function xD
 def main():
-    gen = leer_frames("final_particle_test694206942069420.txt")
+    gen = leer_frames("hola.txt")
     L = 25 # L could be added as a file header
            # N could also be added as a file header 
     

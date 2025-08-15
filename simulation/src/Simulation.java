@@ -133,6 +133,25 @@ public class Simulation {
         }
     }
 
+    private void bruteForceMethod(){
+        for(int i = 0; i < N; i++ ){
+            for(int j = i + 1; j < N; j++){
+                double dx = particles.get(i).getCurrentX() - particles.get(j).getCurrentX();
+                double dy = particles.get(i).getCurrentY() - particles.get(j).getCurrentY();
+
+                dx = dx - Math.round(dx / L) * L;
+                dy = dy - Math.round(dy / L) * L;
+
+                double distance = Math.sqrt(dx*dx + dy*dy);
+
+                if(distance < rc){
+                    particles.get(i).addNeighbor(particles.get(j));
+                    particles.get(j).addNeighbor(particles.get(i));
+                }
+            }
+        }
+    }
+
     private void updatePositions(int iteration){
         List<Particle> updatedParticlesPositions = new ArrayList<>(N);
         for(Particle particle: particles) {
@@ -185,7 +204,7 @@ public class Simulation {
     public void runSimulationForAnimation(String filePath) {
         writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
-            findNeighbors();
+            bruteForceMethod();
             updatePositions(i);
             writeParticleDataToFile(filePath, i, particles);
         }
@@ -195,7 +214,7 @@ public class Simulation {
     public void runSimulationForPolarization(String filePath, double nu) {
         setNu(nu);
         for(int i = 1; i <= maxIterations; i++){
-            findNeighbors();
+            bruteForceMethod();
             updatePositions(i);
         }
         writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), nu));
@@ -206,7 +225,7 @@ public class Simulation {
     public void runSimulationForDensity(String filePath, int N){
         setDensity((double) N /L);
         for(int i = 1; i <= maxIterations; i++){
-            findNeighbors();
+            bruteForceMethod();
             updatePositions(i);
         }
         writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));
