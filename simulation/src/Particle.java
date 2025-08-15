@@ -4,7 +4,7 @@ import java.util.List;
 /*
 * Models each Particle
 * */
-public class Particle {
+public class Particle implements Comparable<Particle>{
     // Particle velocity (should be) 0.03
     private final double velocity;
 
@@ -59,5 +59,9 @@ public class Particle {
 
     public void addNeighbor(Particle neighbor) {
         neighbors.add(neighbor);
+    }
+
+    public void clearNeighbors(){
+        neighbors.clear();
     }
 }

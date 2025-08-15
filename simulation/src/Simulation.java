@@ -150,6 +150,42 @@ public class Simulation {
         }
     }
 
+    public void testMethods(){
+        findNeighbors();
+        printNeighbours("cellindex.txt");
+        clearNeighbors();
+        bruteForceMethod();
+        printNeighbours("bruteforce.txt");
+        clearNeighbors();
+    }
+
+    private void clearNeighbors(){
+        for(Particle p : particles){
+            p.clearNeighbors();
+        }
+    }
+
+    private void printNeighbours(String fileName){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            for (Particle particle : particles) {
+                writer.write(String.format("%d:[",
+                        particle.getId()));
+                List<Particle> neighbours = particle.getNeighbors();
+                Collections.sort(neighbours, (p1, p2) -> Integer.compare(p2.getId(), p1.getId()));
+
+                for(Particle neighbour : neighbours){
+                    writer.write(String.format("%d ", neighbour.getId()));
+                }
+                writer.write("]");
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     private void updatePositions(int iteration){
         List<Particle> updatedParticlesPositions = new ArrayList<>(N);
         for(Particle particle: particles) {
