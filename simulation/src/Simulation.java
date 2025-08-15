@@ -156,8 +156,10 @@ public class Simulation {
         List<Particle> updatedParticlesPositions = new ArrayList<>(N);
         for(Particle particle: particles) {
             List<Particle> neighbors = particle.getNeighbors();
+            neighbors.add(particle);
             double cosSum = 0;
             double sinSum = 0;
+            double newThetaAngle = particle.getThetaAngle();
 
             // Delta Theta is a random number chosen with a uniform probability from the
             // interval [—theta/2, theta/2].
@@ -178,8 +180,10 @@ public class Simulation {
                 newY += L;
 
             // average theta calculation in radians
-            double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
-            double newThetaAngle = averageTheta + noise;
+            if(neighbors.size() > 1){
+                double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
+                newThetaAngle = averageTheta + noise;
+            }
 
             // particle with updated position and angle
             Particle updatedParticle = new Particle(newX, newY, particle.getVelocity(), newThetaAngle, particle.getId());
@@ -198,7 +202,9 @@ public class Simulation {
         }
         // calculate the magnitude of the composite velocity vector
         double magnitude = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-        return ((magnitude) / (N * particles.getFirst().getVelocity()));
+        double polarizarion = (magnitude) / (N * particles.getFirst().getVelocity());
+        writeDataToFile("polarization-v-time.txt", String.format("%.6f\n", polarizarion));
+        return polarizarion;
     }
 
     public void runSimulationForAnimation(String filePath) {
