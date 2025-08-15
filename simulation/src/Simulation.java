@@ -84,7 +84,6 @@ public class Simulation {
         return particles;
     }
 
-    // Cell Index Method
     private void findNeighbors() {
         HashMap<Cell, List<Particle>> cellMap = new HashMap<>();
         double cell_size = L / M;
@@ -284,7 +283,7 @@ public class Simulation {
     public void runSimulationForAnimation(String filePath) {
         writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
-            bruteForceMethod();
+            findNeighbors();
             updatePositions(i);
             writeParticleDataToFile(filePath, i, particles);
         }
@@ -305,7 +304,7 @@ public class Simulation {
     public void runSimulationForDensity(String filePath, int N){
         setDensity((double) N /L);
         for(int i = 1; i <= maxIterations; i++){
-            bruteForceMethod();
+            findNeighbors();
             updatePositions(i);
         }
         writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));
