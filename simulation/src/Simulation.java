@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
 * Models each simulation
@@ -149,6 +152,43 @@ public class Simulation {
             }
         }
     }
+
+    public void compareCellAndBrute() {
+        findNeighbors();
+        Map<Integer, Set<Integer>> cellNeighbors = snapshotNeighbors();
+        clearNeighbors();
+
+        bruteForceMethod();
+        Map<Integer, Set<Integer>> bruteNeighbors = snapshotNeighbors();
+        clearNeighbors();
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("differences.txt", true))) {
+            for (Particle p : particles) {
+                Set<Integer> cellSet = cellNeighbors.getOrDefault(p.getId(), Collections.emptySet());
+                Set<Integer> bruteSet = bruteNeighbors.getOrDefault(p.getId(), Collections.emptySet());
+
+                if (!cellSet.equals(bruteSet)) {
+                    writer.write("Mismatch for particle \n" + p.getId());
+                    writer.write("Cell method: \n" + cellSet);
+                    writer.write("Brute force: \n" + bruteSet);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Map<Integer, Set<Integer>> snapshotNeighbors() {
+        Map<Integer, Set<Integer>> map = new HashMap<>();
+        for (Particle p : particles) {
+            Set<Integer> ids = p.getNeighbors().stream()
+                                .map(Particle::getId)
+                                .collect(Collectors.toSet());
+            map.put(p.getId(), ids);
+        }
+        return map;
+    }
+
 
     public void testMethods(){
         findNeighbors();
