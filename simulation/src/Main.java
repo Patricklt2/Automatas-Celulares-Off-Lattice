@@ -4,7 +4,7 @@
 * */
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(300, 1, 100, 31, 1, 0.1);
+        Simulation sim = new Simulation(300, 1, 100, 5, 1, 0.1);
         //sim.runSimulationForAnimation("hola.txt");
         /*
         * Tested with:
@@ -19,13 +19,13 @@ public class Main {
         * for fig2a-2:
         * N = 400 , step = 1 , maxIter = 100 , L = 10 , r = 1 , nu = 0,1     -> va -> 1
         * */
-     //sim.runSimulationForAnimation("hola.txt");
+        sim.runSimulationForAnimation("check-polarization.txt");
 
 
         
-        for(double nu = 5; nu > 0; nu-=0.1 ){
+        /*for(double nu = 5; nu > 0; nu-=0.1 ){
             sim.runSimulationForPolarization("polarization.txt", nu);
-        }
+        }*/
         
 
         /*sim.setNu(0.1);
