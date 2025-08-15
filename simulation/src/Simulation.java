@@ -223,8 +223,6 @@ public class Simulation {
         }
     }
 
-
-
     private void updatePositions(int iteration){
         List<Particle> updatedParticlesPositions = new ArrayList<>(N);
         for(Particle particle: particles) {
@@ -281,6 +279,8 @@ public class Simulation {
     }
 
     public void runSimulationForAnimation(String filePath) {
+        writeDataToFile(filePath, String.format("L:%d\n", L));
+        writeDataToFile(filePath, String.format("N:%d\n", N));
         writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
             findNeighbors();
