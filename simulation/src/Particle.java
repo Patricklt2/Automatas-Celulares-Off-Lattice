@@ -31,7 +31,6 @@ public class Particle {
         this.currentY = currentY;
         this.thetaAngle = thetaAngle;
         this.id = id;
-        this.neighbors.add(this);
     }
 
     public double getVelocity() {

@@ -84,13 +84,11 @@ public class Simulation {
     // Cell Index Method
     private void findNeighbors() {
         HashMap<Cell, List<Particle>> cellMap = new HashMap<>();
+        double cell_size = L / M;
 
         for (Particle particle : particles) {
-            int cellX = (int) (particle.getCurrentX() / rc);
-            int cellY = (int) (particle.getCurrentY() / rc);
-
-            cellX = ((cellX % M) + M) % M;
-            cellY = ((cellY % M) + M) % M;
+            int cellX = (int) (particle.getCurrentX() / cell_size) % M;
+            int cellY = (int) (particle.getCurrentY() / cell_size) % M;
 
             Cell cell = new Cell(cellX, cellY);
             cellMap.computeIfAbsent(cell, k -> new ArrayList<>()).add(particle);
@@ -102,8 +100,8 @@ public class Simulation {
 
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
-                    int neighborX = (cell.x + dx + M) % M;
-                    int neighborY = (cell.y + dy + M) % M;
+                    int neighborX = (cell.x + dx) % M;
+                    int neighborY = (cell.y + dy) % M;
 
                     Cell neighborCell = new Cell(neighborX, neighborY);
                     List<Particle> neighborParticles = cellMap.getOrDefault(neighborCell, Collections.emptyList());
@@ -220,7 +218,7 @@ public class Simulation {
     public void runSimulationForPolarization(String filePath, double nu) {
         setNu(nu);
         for(int i = 1; i <= maxIterations; i++){
-            bruteForceMethod();
+            findNeighbors();
             updatePositions(i);
         }
         writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), nu));
@@ -242,7 +240,7 @@ public class Simulation {
         this.timeStep = timeStep;
         this.maxIterations = maxIterations;
         this.L = L;
-        this.rc = 2 * radius;
+        this.rc = radius;
         this.M = (int) Math.floor((double)L / rc);
         this.nu = nu;
         this.density = (double) N / (L * L);
