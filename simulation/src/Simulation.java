@@ -227,7 +227,7 @@ public class Simulation {
     // todo no entiendo lo que tengo que plottear, esto está mal
     // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
     public void runSimulationForDensity(String filePath, int N){
-        setDensity((double) N /L);
+        setDensity((double) N /(L*L));
         for(int i = 1; i <= maxIterations; i++){
             bruteForceMethod();
             updatePositions(i);
