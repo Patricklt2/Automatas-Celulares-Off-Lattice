@@ -87,8 +87,8 @@ public class Simulation {
         double cell_size = L / M;
 
         for (Particle particle : particles) {
-            int cellX = (int) (particle.getCurrentX() / cell_size) % M;
-            int cellY = (int) (particle.getCurrentY() / cell_size) % M;
+            int cellX = (int) ((particle.getCurrentX() / cell_size) + M) % M;
+            int cellY = (int) ((particle.getCurrentY() / cell_size) + M) % M;
 
             Cell cell = new Cell(cellX, cellY);
             cellMap.computeIfAbsent(cell, k -> new ArrayList<>()).add(particle);
@@ -100,8 +100,8 @@ public class Simulation {
 
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
-                    int neighborX = (cell.x + dx) % M;
-                    int neighborY = (cell.y + dy) % M;
+                    int neighborX = (cell.x + dx + M) % M;
+                    int neighborY = (cell.y + dy + M) % M;
 
                     Cell neighborCell = new Cell(neighborX, neighborY);
                     List<Particle> neighborParticles = cellMap.getOrDefault(neighborCell, Collections.emptyList());
