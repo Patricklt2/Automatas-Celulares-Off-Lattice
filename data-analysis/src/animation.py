@@ -179,7 +179,9 @@ def main():
         init_func=init_animation, blit=False, interval=10
     )
 
+    #ani.save("particles.gif", writer=PillowWriter(fps=30))
     plt.show()
+
 
 
 if __name__ == "__main__":
