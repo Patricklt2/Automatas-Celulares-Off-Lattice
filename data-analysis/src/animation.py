@@ -132,7 +132,6 @@ def main():
         print(f"Saved animation to {args.out}")
 """
 
-#We should frontify this function xD
 def main():
     gen = leer_frames("hola.txt")
     arr = leer_header("hola.txt")
@@ -140,18 +139,27 @@ def main():
     L = arr[1]
 
     fig, ax = plt.subplots()
-    ax.set_xlim(0, L)   # Bounds will always be 0 to L
+    ax.set_xlim(0, L)
     ax.set_ylim(0, L)
 
-    # Get first frame to know number of particles  # Small patch until we have a header
     first_frame = next(gen)
 
     xy = np.array([[p.x, p.y] for p in first_frame])
     dx = np.array([np.cos(p.theta) for p in first_frame])
     dy = np.array([np.sin(p.theta) for p in first_frame])
+    angles = np.array([p.theta for p in first_frame])
 
-    # Initialize first frame 
-    quiv = ax.quiver(xy[:,0], xy[:,1], dx, dy, angles='xy', scale_units='xy', scale=None, color='black', width=0.005)
+    quiv = ax.quiver(
+        xy[:, 0], xy[:, 1],
+        dx, dy,
+        angles,
+        angles='xy',
+        scale_units='xy',
+        scale=None,
+        cmap='hsv',
+        width=0.005
+    )
+    fig.colorbar(quiv, ax=ax, label="Orientation (theta)")
 
     def init_animation():
         return quiv,
@@ -160,14 +168,16 @@ def main():
         xy = np.array([[p.x, p.y] for p in particles])
         dx = np.array([np.cos(p.theta) for p in particles])
         dy = np.array([np.sin(p.theta) for p in particles])
+        angles = np.array([p.theta for p in particles])
 
         quiv.set_offsets(xy)
-        quiv.set_UVC(dx, dy)
+        quiv.set_UVC(dx, dy, angles)
         return quiv,
 
     ani = FuncAnimation(
         fig, update_animation, frames=gen,
-        init_func=init_animation, blit=False, interval=10)
+        init_func=init_animation, blit=False, interval=10
+    )
 
     plt.show()
 
