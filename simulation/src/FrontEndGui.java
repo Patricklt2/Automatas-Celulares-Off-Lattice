@@ -167,8 +167,9 @@ public class FrontEndGui {
 
     private static void runSimulationForPolarization(String file, double minNu, double maxNu, double stepNu) {
         for (double nu = minNu; nu <= maxNu; nu += stepNu) {
+            String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), nu);
             sim.resetParticlesToInitialSnapshot();
-            sim.runSimulationForPolarization(file, nu);
+            sim.runSimulationForPolarization(cFile, nu);
         }
         JOptionPane.showMessageDialog(null, "Polarization Animation finished!");
     }

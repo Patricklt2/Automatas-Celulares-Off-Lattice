@@ -64,7 +64,6 @@ public final class Simulation {
                         particle.getThetaAngle()));
                 writer.newLine();
             }
-            writer.write("polarization:" + calculatePolarization() + "\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -324,7 +323,6 @@ public final class Simulation {
         // calculate the magnitude of the composite velocity vector
         double magnitude = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
         double polarizarion = (magnitude) / (N * particles.getFirst().getVelocity());
-        writeDataToFile("polarization-v-time.txt", String.format("%.6f\n", polarizarion));
         return polarizarion;
     }
 
@@ -359,8 +357,8 @@ public final class Simulation {
         for(int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
+            writeDataToFile(filePath, String.format("%.5f\n", calculatePolarization()));
         }
-        writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), nu));
     }
     // todo no entiendo lo que tengo que plottear, esto está mal
     // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
