@@ -25,7 +25,7 @@ public class FrontEndGui {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5,5,5,5);
 
-        String[] simTypes = {"New Simulation Data", "Animation", "RandomNeighbour", "Polarization", "Density"};
+        String[] simTypes = {"New Simulation Data", "Animation", "RandomNeighbour", "Polarization", "Polarization PHI", "Density"};
         JComboBox<String> simTypeBox = new JComboBox<>(simTypes);
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         frame.add(simTypeBox, gbc);
@@ -144,6 +144,7 @@ public class FrontEndGui {
                         int stepN = Integer.parseInt(stepNField.getText());
                         runSimulationForDensity(fileField.getText(), minN, maxN, stepN);
                     }
+                    case "Polarization PHI" -> runSimulationForPolarizationRandomNeighbor(fileField.getText());
                 }
             } catch (HeadlessException | NumberFormatException ex) {
                 JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
@@ -174,6 +175,13 @@ public class FrontEndGui {
         }
         sim.setNu(auxNu);
         JOptionPane.showMessageDialog(null, "Polarization Animation finished!");
+    }
+
+    private static void runSimulationForPolarizationRandomNeighbor(String file) {
+        String cFile = String.format("%s_phi.txt", file.replace(".txt", ""));
+        sim.resetParticlesToInitialSnapshot();
+        sim.runSimulationForPolarizationRandomNeighbor(cFile);
+        JOptionPane.showMessageDialog(null, "Polarization Phi  finished!");
     }
 
     private static void runSimulationForDensity(String file, int minN, int maxN, int stepN) {
