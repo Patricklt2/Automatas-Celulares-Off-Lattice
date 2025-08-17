@@ -78,63 +78,15 @@ def leer_header(filename):
                 return [N, L]
     return [N, L]
 
-
-"""
-Un mini ejemplo de que es con lo que testie que funcione.
 def main():
-    gen = leer_frames("particle_test11.txt")  # Replace with your actual data file
+    parser = argparse.ArgumentParser(description="Arguments for animation script")
 
-    for t_actual, frame_data in gen:
-        print(f"Time: {t_actual}, Particles: {frame_data}")
-"""
+    parser.add_argument("filename", help="The file to process")
 
-"""
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("--input", "-i", required=True, help="Path to fig2a-2.txt")
-    # p.add_argument("--fps", type=int, default=20)
-    # p.add_argument("--marker_size", type=int, default=10)
-    # p.add_argument("--arrows", action="store_true", help="Draw heading arrows if 'theta' column exists")
-    # p.add_argument("--xlim", nargs=2, type=float, help="Override x-axis limits: xmin xmax")
-    # p.add_argument("--ylim", nargs=2, type=float, help="Override y-axis limits: ymin ymax")
-    # p.add_argument("--show", action="store_true", help="Show the animation window instead of saving")
-    # p.add_argument("--save", choices=["gif", "mp4"], help="Save animation to this format")
-    # p.add_argument("--out", default="animation.gif", help="Output file path when using --save")
-    args = p.parse_args()
+    args = parser.parse_args()
 
-    particles = 400
-    L = 10
-    frames = 100
-    fig, ax = plt.subplots()
-    ax.set_xlim(0, L)
-    ax.set_ylim(0, L)
-    scat = ax.scatter([], [])
-
-    df = leer_frames(args.input)
-
-    fig, anim = make_animation(
-        df,
-        fps=args.fps,
-        marker_size=args.marker_size,
-        show_arrows=args.arrows,
-        xlim=args.xlim,
-        ylim=args.ylim,
-    )
-
-    if args.show and args.save:
-        print("Choose either --show or --save, not both.", file=sys.stderr)
-        sys.exit(2)
-
-    if args.show or not args.save:
-        plt.show()
-    else:
-        save_animation(anim, args.out, fps=args.fps, format_=args.save)
-        print(f"Saved animation to {args.out}")
-"""
-
-def main():
-    gen = leer_frames("hola.txt")
-    arr = leer_header("hola.txt")
+    gen = leer_frames(args.filename)
+    arr = leer_header(args.filename)
     N = arr[0]
     L = arr[1]
 
