@@ -30,7 +30,14 @@ public final class Simulation {
     private double density;
 
     public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
-        resetVariables(N, timeStep, maxIterations, L, radius, nu);
+        this.N = N;
+        this.timeStep = timeStep;
+        this.maxIterations = maxIterations;
+        this.L = L;
+        this.rc = radius;
+        this.M = (int) Math.floor((double)L / rc);
+        this.nu = nu;
+        this.density = (double) N / (L * L);
         regenerateParticles();
     }
 
@@ -355,7 +362,6 @@ public final class Simulation {
         }
         writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), nu));
     }
-
     // todo no entiendo lo que tengo que plottear, esto está mal
     // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
     public void runSimulationForDensity(String filePath, int N){
@@ -368,7 +374,6 @@ public final class Simulation {
     }
 
     public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
-        this.N = N;
         this.timeStep = timeStep;
         this.maxIterations = maxIterations;
         this.L = L;
@@ -376,6 +381,12 @@ public final class Simulation {
         this.M = (int) Math.floor((double)L / rc);
         this.nu = nu;
         this.density = (double) N / (L * L);
+
+        if(N == this.N){
+            resetParticlesToInitialSnapshot();
+        } else {
+            regenerateParticles();
+        }
     }
 
     private final static class Cell {
@@ -399,6 +410,46 @@ public final class Simulation {
         public int hashCode() {
             return Objects.hash(x, y);
         }
+    }
+
+    public int getN() {
+        return N;
+    }
+
+    public double getTimeStep() {
+        return timeStep;
+    }
+
+    public int getMaxIterations() {
+        return maxIterations;
+    }
+
+    public int getL() {
+        return L;
+    }
+
+    public double getRc() {
+        return rc;
+    }
+
+    public int getM() {
+        return M;
+    }
+
+    public double getNu() {
+        return nu;
+    }
+
+    public double getDensity() {
+        return density;
+    }
+
+    public List<Particle> getParticles() {
+        return particles;
+    }
+
+    public List<Particle> getInitialSnapshot() {
+        return initialSnapshot;
     }
 }
 
