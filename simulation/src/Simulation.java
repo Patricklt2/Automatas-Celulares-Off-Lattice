@@ -314,7 +314,7 @@ public class Simulation {
         writeParticleDataToFile(path, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
             findNeighbors();
-            updatePositions(i);
+            updatePositionsRandomNeighbour();
             writeParticleDataToFile(path, i, particles);
         }
         writeDataToFile(path, String.format("density:%.3f\n", density));
