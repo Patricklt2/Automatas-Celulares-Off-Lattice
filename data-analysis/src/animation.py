@@ -180,9 +180,13 @@ def main():
     )
 
     #ani.save("particles.gif", writer=PillowWriter(fps=30))
+    
+    # Para guardar la animación como GIF:
+    ani.save("particles.gif", writer="pillow", fps=30)
+
+    # Para guardar la animación como MP4 (requiere ffmpeg instalado):
+    # ani.save("particles.mp4", writer=FFMpegWriter(fps=30))
     plt.show()
-
-
 
 if __name__ == "__main__":
     main()
