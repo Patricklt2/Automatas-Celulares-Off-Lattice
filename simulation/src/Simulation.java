@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
 * Models each simulation
@@ -81,14 +84,13 @@ public class Simulation {
         return particles;
     }
 
-    // Cell Index Method
     private void findNeighbors() {
         HashMap<Cell, List<Particle>> cellMap = new HashMap<>();
         double cell_size = L / M;
 
         for (Particle particle : particles) {
-            int cellX = (int) (particle.getCurrentX() / cell_size) % M;
-            int cellY = (int) (particle.getCurrentY() / cell_size) % M;
+            int cellX = (int) ((particle.getCurrentX() / cell_size) + M) % M;
+            int cellY = (int) ((particle.getCurrentY() / cell_size) + M) % M;
 
             Cell cell = new Cell(cellX, cellY);
             cellMap.computeIfAbsent(cell, k -> new ArrayList<>()).add(particle);
@@ -100,8 +102,8 @@ public class Simulation {
 
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
-                    int neighborX = (cell.x + dx) % M;
-                    int neighborY = (cell.y + dy) % M;
+                    int neighborX = (cell.x + dx + M) % M;
+                    int neighborY = (cell.y + dy + M) % M;
 
                     Cell neighborCell = new Cell(neighborX, neighborY);
                     List<Particle> neighborParticles = cellMap.getOrDefault(neighborCell, Collections.emptyList());
@@ -147,6 +149,77 @@ public class Simulation {
                     particles.get(j).addNeighbor(particles.get(i));
                 }
             }
+        }
+    }
+
+    public void compareCellAndBrute() {
+        findNeighbors();
+        Map<Integer, Set<Integer>> cellNeighbors = snapshotNeighbors();
+        clearNeighbors();
+
+        bruteForceMethod();
+        Map<Integer, Set<Integer>> bruteNeighbors = snapshotNeighbors();
+        clearNeighbors();
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("differences.txt", true))) {
+            for (Particle p : particles) {
+                Set<Integer> cellSet = cellNeighbors.getOrDefault(p.getId(), Collections.emptySet());
+                Set<Integer> bruteSet = bruteNeighbors.getOrDefault(p.getId(), Collections.emptySet());
+
+                if (!cellSet.equals(bruteSet)) {
+                    writer.write("Mismatch for particle \n" + p.getId());
+                    writer.write("Cell method: \n" + cellSet);
+                    writer.write("Brute force: \n" + bruteSet);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Map<Integer, Set<Integer>> snapshotNeighbors() {
+        Map<Integer, Set<Integer>> map = new HashMap<>();
+        for (Particle p : particles) {
+            Set<Integer> ids = p.getNeighbors().stream()
+                                .map(Particle::getId)
+                                .collect(Collectors.toSet());
+            map.put(p.getId(), ids);
+        }
+        return map;
+    }
+
+
+    public void testMethods(){
+        findNeighbors();
+        printNeighbours("cellindex.txt");
+        clearNeighbors();
+        bruteForceMethod();
+        printNeighbours("bruteforce.txt");
+        clearNeighbors();
+    }
+
+    private void clearNeighbors(){
+        for(Particle p : particles){
+            p.clearNeighbors();
+        }
+    }
+
+    private void printNeighbours(String fileName){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            for (Particle particle : particles) {
+                writer.write(String.format("%d:[",
+                        particle.getId()));
+                List<Particle> neighbours = particle.getNeighbors();
+                Collections.sort(neighbours, (p1, p2) -> Integer.compare(p2.getId(), p1.getId()));
+
+                for(Particle neighbour : neighbours){
+                    writer.write(String.format("%d ", neighbour.getId()));
+                }
+                writer.write("]");
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -206,9 +279,11 @@ public class Simulation {
     }
 
     public void runSimulationForAnimation(String filePath) {
+        writeDataToFile(filePath, String.format("L:%d\n", L));
+        writeDataToFile(filePath, String.format("N:%d\n", N));
         writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
-            bruteForceMethod();
+            findNeighbors();
             updatePositions(i);
             writeParticleDataToFile(filePath, i, particles);
         }
@@ -229,7 +304,7 @@ public class Simulation {
     public void runSimulationForDensity(String filePath, int N){
         setDensity((double) N /L);
         for(int i = 1; i <= maxIterations; i++){
-            bruteForceMethod();
+            findNeighbors();
             updatePositions(i);
         }
         writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));

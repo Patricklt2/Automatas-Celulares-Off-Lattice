@@ -29,6 +29,8 @@ class Particle:
 # ---------- Utilities ----------
 
 hdr = re.compile(r"^\s*t\s*:\s*\d+")
+hdr_N = re.compile(r"^\s*N\s*:\s*\d+")
+hdr_L = re.compile(r"^\s*L\s*:\s*\d+")
 hdr_polarization = re.compile(r"^\s*polarization\s*:\s*([\d.,]+)\s*$")
 hdr_density = re.compile(r"^\s*density\s*:\s*([\d.,]+)\s*$")
 
@@ -38,7 +40,7 @@ def leer_frames(filename):
         t_actual = None
         for line in f:
             line = line.strip()
-            if not line or hdr_polarization.match(line) or hdr_density.match(line):
+            if not line or hdr_polarization.match(line) or hdr_density.match(line) or hdr_N.match(line) or hdr_L.match(line):
                 continue
 
             m = hdr.match(line)
@@ -59,6 +61,23 @@ def leer_frames(filename):
         # last frame of the file
         if frame_data:
             yield (frame_data)
+
+def leer_header(filename):
+    N = None
+    L = None
+    with open(filename) as f:
+        for line in f:
+            line = line.strip()
+            m = hdr_L.match(line)
+            if m:
+                L = int(m.group(0).split(':')[1].strip())
+            m = hdr_N.match(line)
+            if m:
+                N = int(m.group(0).split(':')[1].strip())
+            if N is not None and L is not None:
+                return [N, L]
+    return [N, L]
+
 
 """
 Un mini ejemplo de que es con lo que testie que funcione.
@@ -113,26 +132,34 @@ def main():
         print(f"Saved animation to {args.out}")
 """
 
-#We should frontify this function xD
 def main():
     gen = leer_frames("hola.txt")
-    L = 25 # L could be added as a file header
-           # N could also be added as a file header 
-    
+    arr = leer_header("hola.txt")
+    N = arr[0]
+    L = arr[1]
+
     fig, ax = plt.subplots()
-    ax.set_xlim(0, L)   # Bounds will always be 0 to L
+    ax.set_xlim(0, L)
     ax.set_ylim(0, L)
 
-    # Get first frame to know number of particles  # Small patch until we have a header
     first_frame = next(gen)
-    N = len(first_frame)
 
     xy = np.array([[p.x, p.y] for p in first_frame])
     dx = np.array([np.cos(p.theta) for p in first_frame])
     dy = np.array([np.sin(p.theta) for p in first_frame])
+    angles = np.array([p.theta for p in first_frame])
 
-    # Initialize first frame 
-    quiv = ax.quiver(xy[:,0], xy[:,1], dx, dy, angles='xy', scale_units='xy', scale=1, color='black', width=0.005)
+    quiv = ax.quiver(
+        xy[:, 0], xy[:, 1],
+        dx, dy,
+        angles,
+        angles='xy',
+        scale_units='xy',
+        scale=None,
+        cmap='hsv',
+        width=0.005
+    )
+    fig.colorbar(quiv, ax=ax, label="Orientation (theta)")
 
     def init_animation():
         return quiv,
@@ -141,16 +168,20 @@ def main():
         xy = np.array([[p.x, p.y] for p in particles])
         dx = np.array([np.cos(p.theta) for p in particles])
         dy = np.array([np.sin(p.theta) for p in particles])
+        angles = np.array([p.theta for p in particles])
 
         quiv.set_offsets(xy)
-        quiv.set_UVC(dx, dy)
+        quiv.set_UVC(dx, dy, angles)
         return quiv,
 
     ani = FuncAnimation(
         fig, update_animation, frames=gen,
-        init_func=init_animation, blit=False, interval=50)
+        init_func=init_animation, blit=False, interval=10
+    )
 
+    #ani.save("particles.gif", writer=PillowWriter(fps=30))
     plt.show()
+
 
 
 if __name__ == "__main__":
