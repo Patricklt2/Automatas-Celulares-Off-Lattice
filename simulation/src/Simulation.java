@@ -188,7 +188,6 @@ public class Simulation {
         return map;
     }
 
-
     public void testMethods(){
         findNeighbors();
         printNeighbours("cellindex.txt");
@@ -263,6 +262,35 @@ public class Simulation {
         particles = updatedParticlesPositions;
     }
 
+    private void updatePositionsRandomNeighbour(){
+        List<Particle> updatedParticlesPositions = new ArrayList<>(N);
+        for(Particle particle: particles) {
+            List<Particle> neighbors = particle.getNeighbors();
+
+            //If no neighbours are present, then we keep the old angle
+            double newThetaAngle = particle.getThetaAngle();
+
+            if(!neighbors.isEmpty()) {
+                Particle randomNeighbour = neighbors.get((int) (Math.random() * neighbors.size()));
+                newThetaAngle = randomNeighbour.getThetaAngle();
+            }
+            
+            double newX = (particle.getCurrentX()
+                    + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep) % L;
+            double newY = (particle.getCurrentY()
+                    + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep) % L;
+
+            if (newX < 0)
+                newX += L;
+            if (newY < 0)
+                newY += L;
+
+            Particle updatedParticle = new Particle(newX, newY, particle.getVelocity(), newThetaAngle, particle.getId());
+            updatedParticlesPositions.add(updatedParticle);
+        }
+        particles = updatedParticlesPositions;
+    }
+
     private double calculatePolarization() {
         // sum of velocity components for each particle
         double velocityX = 0.0;
@@ -276,6 +304,20 @@ public class Simulation {
         double polarizarion = (magnitude) / (N * particles.getFirst().getVelocity());
         writeDataToFile("polarization-v-time.txt", String.format("%.6f\n", polarizarion));
         return polarizarion;
+    }
+
+    public void runSimulationForAnimationRandomNeighbour(String filePath) {
+        String path = String.format("random_neighbour_%s",filePath);
+
+        writeDataToFile(path, String.format("L:%d\n", L));
+        writeDataToFile(path, String.format("N:%d\n", N));
+        writeParticleDataToFile(path, 0, particles);
+        for (int i = 1; i <= maxIterations; i++){
+            findNeighbors();
+            updatePositions(i);
+            writeParticleDataToFile(path, i, particles);
+        }
+        writeDataToFile(path, String.format("density:%.3f\n", density));
     }
 
     public void runSimulationForAnimation(String filePath) {
