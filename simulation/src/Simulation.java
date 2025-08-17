@@ -372,8 +372,8 @@ public final class Simulation {
         for(int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
+            writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));
         }
-        writeDataToFile(filePath, String.format("%.5f;%.5f\n", calculatePolarization(), density));
     }
 
     public void resetVariables(int N, double timeStep, int maxIterations, int L, double radius, double nu) {

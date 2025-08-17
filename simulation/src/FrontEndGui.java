@@ -179,8 +179,9 @@ public class FrontEndGui {
     private static void runSimulationForDensity(String file, int minN, int maxN, int stepN) {
         int auxN = sim.getN();
         for (int n = minN; n <= maxN; n += stepN) {
+            String cFile = String.format("%s_D_%d.txt", file.replace(".txt", ""), n);
             sim.resetVariables(n, sim.getTimeStep(), sim.getMaxIterations(), sim.getL(), sim.getRc(), sim.getNu());
-            sim.runSimulationForDensity(file, n);
+            sim.runSimulationForDensity(cFile, n);
         }
         sim.setN(auxN);
         JOptionPane.showMessageDialog(null, "Density Animation finished!");
