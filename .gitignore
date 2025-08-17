@@ -13,6 +13,8 @@
 .idea
 .vscode 
 
+.gif
+
 # Package Files #
 *.jar
 *.war
