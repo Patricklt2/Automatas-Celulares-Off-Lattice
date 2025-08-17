@@ -166,19 +166,23 @@ public class FrontEndGui {
     }
 
     private static void runSimulationForPolarization(String file, double minNu, double maxNu, double stepNu) {
+        double auxNu = sim.getNu();
         for (double nu = minNu; nu <= maxNu; nu += stepNu) {
             String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), nu);
             sim.resetParticlesToInitialSnapshot();
             sim.runSimulationForPolarization(cFile, nu);
         }
+        sim.setNu(auxNu);
         JOptionPane.showMessageDialog(null, "Polarization Animation finished!");
     }
 
     private static void runSimulationForDensity(String file, int minN, int maxN, int stepN) {
+        int auxN = sim.getN();
         for (int n = minN; n <= maxN; n += stepN) {
             sim.resetVariables(n, sim.getTimeStep(), sim.getMaxIterations(), sim.getL(), sim.getRc(), sim.getNu());
             sim.runSimulationForDensity(file, n);
         }
+        sim.setN(auxN);
         JOptionPane.showMessageDialog(null, "Density Animation finished!");
     }
 

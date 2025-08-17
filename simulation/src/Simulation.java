@@ -53,6 +53,11 @@ public final class Simulation {
         this.nu = nu;
     }
     
+    public void setN(int N){
+        this.N = N;
+        this.density = (double) N / (L * L);
+    }
+
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
@@ -363,7 +368,7 @@ public final class Simulation {
     // todo no entiendo lo que tengo que plottear, esto está mal
     // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
     public void runSimulationForDensity(String filePath, int N){
-        setDensity((double) N /L);
+        setDensity((double) N /(L * L));
         for(int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
