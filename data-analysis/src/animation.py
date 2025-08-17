@@ -82,6 +82,7 @@ def main():
     parser = argparse.ArgumentParser(description="Arguments for animation script")
 
     parser.add_argument("filename", help="The file to process")
+    parser.add_argument("-s", "--save", action="store_true", help="Enable saving the animation to a file", default=False)
 
     args = parser.parse_args()
 
@@ -131,9 +132,10 @@ def main():
         init_func=init_animation, blit=False, interval=10
     )
 
-    #ani.save("particles.gif", writer=PillowWriter(fps=30))
     plt.show()
 
+    if args.save:
+        ani.save("particles.gif", writer=PillowWriter(fps=30))
 
 
 if __name__ == "__main__":
