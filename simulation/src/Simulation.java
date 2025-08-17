@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
 * 
 * */
 
-public class Simulation {
+public final class Simulation {
     private List<Particle> particles;
+    private List<Particle> initialSnapshot;
     private int N;
     private double timeStep;
     private int maxIterations;
@@ -30,6 +31,7 @@ public class Simulation {
 
     public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
         resetVariables(N, timeStep, maxIterations, L, radius, nu);
+        regenerateParticles();
     }
 
     public void setDensity(double density){
@@ -82,6 +84,19 @@ public class Simulation {
         }
 
         return particles;
+    }
+
+    public void resetParticlesToInitialSnapshot() {
+        this.particles = initialSnapshot.stream()
+            .map(Particle::copy)
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public void regenerateParticles() {
+        this.particles = generateParticles();
+        this.initialSnapshot = particles.stream()
+            .map(Particle::copy)
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private void findNeighbors() {
@@ -307,7 +322,7 @@ public class Simulation {
     }
 
     public void runSimulationForAnimationRandomNeighbour(String filePath) {
-        String path = String.format("random_neighbour_%s",filePath);
+        String path = String.format("rn_%s",filePath);
 
         writeDataToFile(path, String.format("L:%d\n", L));
         writeDataToFile(path, String.format("N:%d\n", N));
@@ -361,7 +376,6 @@ public class Simulation {
         this.M = (int) Math.floor((double)L / rc);
         this.nu = nu;
         this.density = (double) N / (L * L);
-        this.particles = generateParticles();
     }
 
     private final static class Cell {

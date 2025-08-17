@@ -137,6 +137,5 @@ def main():
     if args.save:
         ani.save("particles.gif", writer=PillowWriter(fps=30))
 
-
 if __name__ == "__main__":
     main()

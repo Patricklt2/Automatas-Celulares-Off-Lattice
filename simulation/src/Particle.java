@@ -64,4 +64,8 @@ public class Particle{
     public void clearNeighbors(){
         neighbors.clear();
     }
+
+    public Particle copy() {
+        return new Particle(this.currentX, this.currentY, this.velocity, this.thetaAngle, this.id);
+    }
 }
