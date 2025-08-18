@@ -25,7 +25,7 @@ public class FrontEndGui {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5,5,5,5);
 
-        String[] simTypes = {"New Simulation Data", "Animation", "RandomNeighbour", "Polarization", "Density"};
+        String[] simTypes = {"New Simulation Data", "Animation", "RandomNeighbour", "Polarization", "Polarization PHI", "Density"};
         JComboBox<String> simTypeBox = new JComboBox<>(simTypes);
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         frame.add(simTypeBox, gbc);
@@ -144,6 +144,7 @@ public class FrontEndGui {
                         int stepN = Integer.parseInt(stepNField.getText());
                         runSimulationForDensity(fileField.getText(), minN, maxN, stepN);
                     }
+                    case "Polarization PHI" -> runSimulationForPolarizationRandomNeighbor(fileField.getText());
                 }
             } catch (HeadlessException | NumberFormatException ex) {
                 JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
@@ -166,18 +167,31 @@ public class FrontEndGui {
     }
 
     private static void runSimulationForPolarization(String file, double minNu, double maxNu, double stepNu) {
+        double auxNu = sim.getNu();
         for (double nu = minNu; nu <= maxNu; nu += stepNu) {
+            String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), nu);
             sim.resetParticlesToInitialSnapshot();
-            sim.runSimulationForPolarization(file, nu);
+            sim.runSimulationForPolarization(cFile, nu);
         }
+        sim.setNu(auxNu);
         JOptionPane.showMessageDialog(null, "Polarization Animation finished!");
     }
 
+    private static void runSimulationForPolarizationRandomNeighbor(String file) {
+        String cFile = String.format("%s_phi.txt", file.replace(".txt", ""));
+        sim.resetParticlesToInitialSnapshot();
+        sim.runSimulationForPolarizationRandomNeighbor(cFile);
+        JOptionPane.showMessageDialog(null, "Polarization Phi  finished!");
+    }
+
     private static void runSimulationForDensity(String file, int minN, int maxN, int stepN) {
+        int auxN = sim.getN();
         for (int n = minN; n <= maxN; n += stepN) {
+            String cFile = String.format("%s_D_%d.txt", file.replace(".txt", ""), n);
             sim.resetVariables(n, sim.getTimeStep(), sim.getMaxIterations(), sim.getL(), sim.getRc(), sim.getNu());
-            sim.runSimulationForDensity(file, n);
+            sim.runSimulationForDensity(cFile, n);
         }
+        sim.setN(auxN);
         JOptionPane.showMessageDialog(null, "Density Animation finished!");
     }
 

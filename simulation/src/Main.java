@@ -4,6 +4,7 @@
 * */
 public class Main {
     public static void main(String[] args) {
+
         Simulation sim = new Simulation(1000, 1, 1000, 15, 1, 1);
         //sim.runSimulationForAnimation("hola.txt");
         //sim.runSimulationForAnimationRandomNeighbour("hola.txt");
