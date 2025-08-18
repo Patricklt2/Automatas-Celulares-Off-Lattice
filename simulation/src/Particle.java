@@ -4,7 +4,7 @@ import java.util.List;
 /*
 * Models each Particle
 * */
-public class Particle {
+public class Particle{
     // Particle velocity (should be) 0.03
     private final double velocity;
 
@@ -59,5 +59,13 @@ public class Particle {
 
     public void addNeighbor(Particle neighbor) {
         neighbors.add(neighbor);
+    }
+
+    public void clearNeighbors(){
+        neighbors.clear();
+    }
+
+    public Particle copy() {
+        return new Particle(this.currentX, this.currentY, this.velocity, this.thetaAngle, this.id);
     }
 }

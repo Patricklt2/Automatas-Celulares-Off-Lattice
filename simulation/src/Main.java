@@ -4,10 +4,13 @@
 * */
 public class Main {
     public static void main(String[] args) {
-        Simulation sim = new Simulation(400, 1, 2000, 10, 1, 2);
+        
+        Simulation sim = new Simulation(1000, 1, 1000, 15, 1, 1);
         //sim.runSimulationForAnimation("hola.txt");
-        /*
-        * Tested with:
+        //sim.runSimulationForAnimationRandomNeighbour("hola.txt");
+
+
+        /* Tested with:
         *
         * N=10, L = 5, ts = 1, maxiter = 10, r=1 , nu = 0.1   --> low noise
         * N = 5000, L= 5, ts = 1, maxiter = 10, r = 1, nu = 10   --> high noise
@@ -19,7 +22,7 @@ public class Main {
         * for fig2a-2:
         * N = 400 , step = 1 , maxIter = 100 , L = 10 , r = 1 , nu = 0,1     -> va -> 1
         * */
-        sim.runSimulationForAnimation("check-polarization.txt");
+        //sim.runSimulationForAnimation("check-polarization.txt");
 
 
         

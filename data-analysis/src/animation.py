@@ -29,6 +29,8 @@ class Particle:
 # ---------- Utilities ----------
 
 hdr = re.compile(r"^\s*t\s*:\s*\d+")
+hdr_N = re.compile(r"^\s*N\s*:\s*\d+")
+hdr_L = re.compile(r"^\s*L\s*:\s*\d+")
 hdr_polarization = re.compile(r"^\s*polarization\s*:\s*([\d.,]+)\s*$")
 hdr_density = re.compile(r"^\s*density\s*:\s*([\d.,]+)\s*$")
 
@@ -38,7 +40,7 @@ def leer_frames(filename):
         t_actual = None
         for line in f:
             line = line.strip()
-            if not line or hdr_polarization.match(line) or hdr_density.match(line):
+            if not line or hdr_polarization.match(line) or hdr_density.match(line) or hdr_N.match(line) or hdr_L.match(line):
                 continue
 
             m = hdr.match(line)
@@ -60,79 +62,57 @@ def leer_frames(filename):
         if frame_data:
             yield (frame_data)
 
-"""
-Un mini ejemplo de que es con lo que testie que funcione.
+def leer_header(filename):
+    N = None
+    L = None
+    with open(filename) as f:
+        for line in f:
+            line = line.strip()
+            m = hdr_L.match(line)
+            if m:
+                L = int(m.group(0).split(':')[1].strip())
+            m = hdr_N.match(line)
+            if m:
+                N = int(m.group(0).split(':')[1].strip())
+            if N is not None and L is not None:
+                return [N, L]
+    return [N, L]
+
 def main():
-    gen = leer_frames("particle_test11.txt")  # Replace with your actual data file
+    parser = argparse.ArgumentParser(description="Arguments for animation script")
 
-    for t_actual, frame_data in gen:
-        print(f"Time: {t_actual}, Particles: {frame_data}")
-"""
+    parser.add_argument("filename", help="The file to process")
+    parser.add_argument("-s", "--save", action="store_true", help="Enable saving the animation to a file", default=False)
 
-"""
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("--input", "-i", required=True, help="Path to fig2a-2.txt")
-    # p.add_argument("--fps", type=int, default=20)
-    # p.add_argument("--marker_size", type=int, default=10)
-    # p.add_argument("--arrows", action="store_true", help="Draw heading arrows if 'theta' column exists")
-    # p.add_argument("--xlim", nargs=2, type=float, help="Override x-axis limits: xmin xmax")
-    # p.add_argument("--ylim", nargs=2, type=float, help="Override y-axis limits: ymin ymax")
-    # p.add_argument("--show", action="store_true", help="Show the animation window instead of saving")
-    # p.add_argument("--save", choices=["gif", "mp4"], help="Save animation to this format")
-    # p.add_argument("--out", default="animation.gif", help="Output file path when using --save")
-    args = p.parse_args()
+    args = parser.parse_args()
 
-    particles = 400
-    L = 10
-    frames = 100
+    gen = leer_frames(args.filename)
+    arr = leer_header(args.filename)
+    N = arr[0]
+    L = arr[1]
+
     fig, ax = plt.subplots()
     ax.set_xlim(0, L)
     ax.set_ylim(0, L)
-    scat = ax.scatter([], [])
 
-    df = leer_frames(args.input)
-
-    fig, anim = make_animation(
-        df,
-        fps=args.fps,
-        marker_size=args.marker_size,
-        show_arrows=args.arrows,
-        xlim=args.xlim,
-        ylim=args.ylim,
-    )
-
-    if args.show and args.save:
-        print("Choose either --show or --save, not both.", file=sys.stderr)
-        sys.exit(2)
-
-    if args.show or not args.save:
-        plt.show()
-    else:
-        save_animation(anim, args.out, fps=args.fps, format_=args.save)
-        print(f"Saved animation to {args.out}")
-"""
-
-#We should frontify this function xD
-def main():
-    gen = leer_frames("hola.txt")
-    L = 25 # L could be added as a file header
-           # N could also be added as a file header 
-    
-    fig, ax = plt.subplots()
-    ax.set_xlim(0, L)   # Bounds will always be 0 to L
-    ax.set_ylim(0, L)
-
-    # Get first frame to know number of particles  # Small patch until we have a header
     first_frame = next(gen)
-    N = len(first_frame)
 
     xy = np.array([[p.x, p.y] for p in first_frame])
     dx = np.array([np.cos(p.theta) for p in first_frame])
     dy = np.array([np.sin(p.theta) for p in first_frame])
+    angles = np.array([p.theta for p in first_frame])
 
-    # Initialize first frame 
-    quiv = ax.quiver(xy[:,0], xy[:,1], dx, dy, angles='xy', scale_units='xy', scale=1, color='black', width=0.005)
+    quiv = ax.quiver(
+        xy[:, 0], xy[:, 1],
+        dx, dy,
+        angles,
+        angles='xy',
+        scale_units='xy',
+        scale=None,
+        cmap='hsv',
+        width=0.005
+    )
+    fig.colorbar(quiv, ax=ax, label="Orientation (theta)")
 
     def init_animation():
         return quiv,
@@ -141,17 +121,21 @@ def main():
         xy = np.array([[p.x, p.y] for p in particles])
         dx = np.array([np.cos(p.theta) for p in particles])
         dy = np.array([np.sin(p.theta) for p in particles])
+        angles = np.array([p.theta for p in particles])
 
         quiv.set_offsets(xy)
-        quiv.set_UVC(dx, dy)
+        quiv.set_UVC(dx, dy, angles)
         return quiv,
 
     ani = FuncAnimation(
         fig, update_animation, frames=gen,
-        init_func=init_animation, blit=False, interval=50)
+        init_func=init_animation, blit=False, interval=10
+    )
 
     plt.show()
 
+    if args.save:
+        ani.save("particles.gif", writer=PillowWriter(fps=30))
 
 if __name__ == "__main__":
     main()
