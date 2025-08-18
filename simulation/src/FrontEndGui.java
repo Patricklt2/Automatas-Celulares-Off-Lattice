@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -13,6 +14,7 @@ public class FrontEndGui {
     private static Simulation sim;
 
     public static void main(String[] args) {
+        Locale.setDefault(Locale.US);
         SwingUtilities.invokeLater(FrontEndGui::createAndShowGUI);
     }
 
