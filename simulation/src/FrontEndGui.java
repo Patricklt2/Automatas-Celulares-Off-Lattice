@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -169,13 +172,25 @@ public class FrontEndGui {
     }
 
     private static void runSimulationForPolarization(String file, double minNu, double maxNu, double stepNu) {
-        double auxNu = sim.getNu();
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+
         for (double nu = minNu; nu <= maxNu; nu += stepNu) {
-            String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), nu);
-            sim.resetParticlesToInitialSnapshot();
-            sim.runSimulationForPolarization(cFile, nu);
+            final double currentNu = nu;
+            executor.submit(() -> {
+                Simulation localSim = sim.clone();
+                String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), currentNu);
+                localSim.runSimulationForPolarization(cFile, currentNu);
+            });
         }
-        sim.setNu(auxNu);
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         JOptionPane.showMessageDialog(null, "Polarization Animation finished!");
     }
 
