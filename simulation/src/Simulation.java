@@ -2,7 +2,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /*
 * Models each simulation
@@ -85,8 +83,8 @@ public final class Simulation {
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
-            StringBuilder strBuilder = new StringBuilder();
             for (Particle particle : particles) {
+                StringBuilder strBuilder = new StringBuilder();
                 strBuilder.append(particle.getId()).append(";")
                         .append(particle.getCurrentX()).append(";")
                         .append(particle.getCurrentY()).append(";")
