@@ -85,13 +85,13 @@ public final class Simulation {
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
+            StringBuilder strBuilder = new StringBuilder();
             for (Particle particle : particles) {
-                writer.write(String.format("%d;%.6f;%.6f;%.6f",
-                        particle.getId(),
-                        particle.getCurrentX(),
-                        particle.getCurrentY(),
-                        particle.getThetaAngle()));
-                writer.newLine();
+                strBuilder.append(particle.getId()).append(";")
+                        .append(particle.getCurrentX()).append(";")
+                        .append(particle.getCurrentY()).append(";")
+                        .append(particle.getThetaAngle()).append("\n");
+                writer.write(strBuilder.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -363,7 +363,7 @@ public final class Simulation {
                 newY += L;
 
             // average theta calculation in radians
-            if(neighbors.size() > 1){
+            if(neighbors.size() >= 1){
                 double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
                 newThetaAngle = averageTheta + noise;
             }
@@ -373,42 +373,6 @@ public final class Simulation {
             updatedParticlesPositions.add(updatedParticle);
         }
         particles = updatedParticlesPositions;
-    }
-
-    private void updatePositionsParallel() {
-        Particle[] updatedParticles = new Particle[N];
-
-        IntStream.range(0, N).parallel().forEach(i -> {
-            Particle particle = particles.get(i);
-            List<Particle> neighbors = new ArrayList<>(particle.getNeighbors());
-            neighbors.add(particle);
-
-            double cosSum = 0;
-            double sinSum = 0;
-            for (Particle neighbor : neighbors) {
-                cosSum += Math.cos(neighbor.getThetaAngle());
-                sinSum += Math.sin(neighbor.getThetaAngle());
-            }
-
-            double newThetaAngle = particle.getThetaAngle();
-            if (neighbors.size() > 1) {
-                double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
-                double noise = (Math.random() - 0.5) * this.nu;
-                newThetaAngle = averageTheta + noise;
-            }
-
-            double newX = (particle.getCurrentX()
-                    + particle.getVelocity() * Math.cos(particle.getThetaAngle()) * timeStep) % L;
-            double newY = (particle.getCurrentY()
-                    + particle.getVelocity() * Math.sin(particle.getThetaAngle()) * timeStep) % L;
-
-            if (newX < 0) newX += L;
-            if (newY < 0) newY += L;
-
-            updatedParticles[i] = new Particle(newX, newY, particle.getVelocity(), newThetaAngle, particle.getId());
-        });
-
-        particles = Arrays.asList(updatedParticles);
     }
 
     private void updatePositionsRandomNeighbour(){
@@ -473,8 +437,8 @@ public final class Simulation {
         writeDataToFile(filePath, String.format("N:%d\n", N));
         writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
-            findNeighborsParallel();
-            updatePositionsParallel();
+            findNeighbors();
+            updatePositions(i);
             writeParticleDataToFile(filePath, i, particles);
         }
         writeDataToFile(filePath, String.format("density:%.3f\n", density));

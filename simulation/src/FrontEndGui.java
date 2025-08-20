@@ -182,6 +182,7 @@ public class FrontEndGui {
                 String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), currentNu);
                 localSim.runSimulationForPolarization(cFile, currentNu);
             });
+            sim.regenerateParticles();
         }
 
         executor.shutdown();
