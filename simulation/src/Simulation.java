@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /*
@@ -43,6 +45,26 @@ public final class Simulation {
         regenerateParticles();
     }
 
+
+    private Simulation(int N, double timeStep, int maxIterations, int L, double rc, double nu,
+                    List<Particle> particles, List<Particle> initialSnapshot, int M, double density) {
+        this.N = N;
+        this.timeStep = timeStep;
+        this.maxIterations = maxIterations;
+        this.L = L;
+        this.rc = rc;
+        this.nu = nu;
+        this.M = M;
+        this.density = density;
+
+        this.particles = particles.stream().map(Particle::copy).collect(Collectors.toCollection(ArrayList::new));
+        this.initialSnapshot = initialSnapshot.stream().map(Particle::copy).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public Simulation clone() {
+        return new Simulation(N, timeStep, maxIterations, L, rc, nu, particles, initialSnapshot, M, density);
+    }
+
     public void setDensity(double density){
         this.density = density;
     }
@@ -64,12 +86,12 @@ public final class Simulation {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write("t:" + step + "\n");
             for (Particle particle : particles) {
-                writer.write(String.format("%d;%.6f;%.6f;%.6f",
-                        particle.getId(),
-                        particle.getCurrentX(),
-                        particle.getCurrentY(),
-                        particle.getThetaAngle()));
-                writer.newLine();
+                StringBuilder strBuilder = new StringBuilder();
+                strBuilder.append(particle.getId()).append(";")
+                        .append(particle.getCurrentX()).append(";")
+                        .append(particle.getCurrentY()).append(";")
+                        .append(particle.getThetaAngle()).append("\n");
+                writer.write(strBuilder.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -161,6 +183,69 @@ public final class Simulation {
         }
     }
 
+    private void findNeighborsParallel(){
+        ConcurrentHashMap<Cell, List<Particle>> cellMap = new ConcurrentHashMap<>();
+        double cell_size = (double) L / M;
+
+        particles.parallelStream().forEach(particle -> {
+            int cellX = (int) ((particle.getCurrentX() / cell_size) + M) % M;
+            int cellY = (int) ((particle.getCurrentY() / cell_size) + M) % M;
+            Cell cell = new Cell(cellX, cellY);
+
+            cellMap.compute(cell, (k, list) -> {
+                if (list == null) list = new ArrayList<>();
+                list.add(particle);
+                return list;
+            });
+        });
+
+        Map<Integer, List<Integer>> tempNeighbors = new ConcurrentHashMap<>();
+
+        particles.parallelStream().forEach(p -> {
+            List<Integer> neighborsForParticle = new ArrayList<>();
+
+            int cellX = (int) ((p.getCurrentX() / cell_size) + M) % M;
+            int cellY = (int) ((p.getCurrentY() / cell_size) + M) % M;
+
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    int neighborX = (cellX + dx + M) % M;
+                    int neighborY = (cellY + dy + M) % M;
+                    Cell neighborCell = new Cell(neighborX, neighborY);
+
+                    List<Particle> neighborParticles = cellMap.getOrDefault(neighborCell, Collections.emptyList());
+                    for (Particle neighbor : neighborParticles) {
+                        if (p.getId() >= neighbor.getId()) continue;
+
+                        double dxPos = neighbor.getCurrentX() - p.getCurrentX();
+                        double dyPos = neighbor.getCurrentY() - p.getCurrentY();
+
+                        dxPos -= Math.round(dxPos / L) * L;
+                        dyPos -= Math.round(dyPos / L) * L;
+
+                        double distance = Math.sqrt(dxPos * dxPos + dyPos * dyPos);
+                        if (distance <= rc) {
+                            neighborsForParticle.add(neighbor.getId());
+                        }
+                    }
+                }
+            }
+            tempNeighbors.put(p.getId(), neighborsForParticle);
+        });
+
+        Map<Integer, Particle> particleById = particles.stream()
+                .collect(Collectors.toMap(Particle::getId, Function.identity()));
+
+        for (Map.Entry<Integer, List<Integer>> entry : tempNeighbors.entrySet()) {
+            Particle p = particleById.get(entry.getKey());
+            for (Integer neighborId : entry.getValue()) {
+                Particle neighbor = particleById.get(neighborId);
+                p.addNeighbor(neighbor);
+                neighbor.addNeighbor(p);
+            }
+        }
+    }
+
     private void bruteForceMethod(){
         for(int i = 0; i < N; i++ ){
             for(int j = i + 1; j < N; j++){
@@ -181,7 +266,7 @@ public final class Simulation {
     }
 
     public void compareCellAndBrute() {
-        findNeighbors();
+        findNeighborsParallel();
         Map<Integer, Set<Integer>> cellNeighbors = snapshotNeighbors();
         clearNeighbors();
 
@@ -278,7 +363,7 @@ public final class Simulation {
                 newY += L;
 
             // average theta calculation in radians
-            if(neighbors.size() > 1){
+            if(neighbors.size() >= 1){
                 double averageTheta = Math.atan2(sinSum / neighbors.size(), cosSum / neighbors.size());
                 newThetaAngle = averageTheta + noise;
             }
