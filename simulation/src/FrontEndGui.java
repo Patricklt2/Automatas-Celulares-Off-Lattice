@@ -184,11 +184,12 @@ public class FrontEndGui {
         JOptionPane.showMessageDialog(null, "Polarization Phi  finished!");
     }
 
+    // Run for L=20 nu = 1
     private static void runSimulationForDensity(String file, int minN, int maxN, int stepN) {
         int auxN = sim.getN();
         for (int n = minN; n <= maxN; n += stepN) {
             String cFile = String.format("%s_D_%d.txt", file.replace(".txt", ""), n);
-            sim.resetVariables(n, sim.getTimeStep(), sim.getMaxIterations(), sim.getL(), sim.getRc(), sim.getNu());
+            sim.resetParticlesToInitialSnapshot();
             sim.runSimulationForDensity(cFile, n);
         }
         sim.setN(auxN);
