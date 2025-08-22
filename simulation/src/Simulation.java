@@ -56,7 +56,7 @@ public final class Simulation {
         this.nu = nu;
         this.M = M;
         this.density = density;
-
+        this.random = new Random();
         this.particles = particles.stream().map(Particle::copy).collect(Collectors.toCollection(ArrayList::new));
         this.initialSnapshot = initialSnapshot.stream().map(Particle::copy).collect(Collectors.toCollection(ArrayList::new));
     }
@@ -113,7 +113,7 @@ public final class Simulation {
         for (int i = 0; i < N; i++) {
             double currentX = random.nextDouble() * L; // Random X position within L
             double currentY = random.nextDouble() * L; // Random Y position within L
-            double thetaAngle = random.nextDouble() * 2.0 * Math.PI; // randomize 0 to 360 degrees
+            double thetaAngle = (random.nextDouble() * 2.0 * Math.PI) - Math.PI;
             Particle particle = new Particle(currentX, currentY, velocity, thetaAngle, i);
             particles.add(particle);
         }
@@ -136,7 +136,7 @@ public final class Simulation {
 
     private void findNeighbors() {
         HashMap<Cell, List<Particle>> cellMap = new HashMap<>();
-        double cell_size = L / M;
+        double cell_size = (double) L / M;
 
         for (Particle particle : particles) {
             int cellX = (int) ((particle.getCurrentX() / cell_size) + M) % M;
@@ -465,7 +465,9 @@ public final class Simulation {
     // todo no entiendo lo que tengo que plottear, esto está mal
     // note: L is constant, we increase density by increasing N -> check for d between 0 and 10
     public void runSimulationForDensity(String filePath, int N){
-        setDensity((double) N /(L * L));
+        setN(N);
+        this.particles = generateParticles();
+        System.out.printf("density: %.5f", density);
         for(int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
