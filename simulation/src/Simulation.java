@@ -28,6 +28,7 @@ public final class Simulation {
     private int M;
     private double nu;
     private double density;
+    private final Random random;
 
     public Simulation(int N, double timeStep, int maxIterations, int L, double radius, double nu) {
         this.N = N;
@@ -38,6 +39,7 @@ public final class Simulation {
         this.M = (int) Math.floor((double)L / rc);
         this.nu = nu;
         this.density = (double) N / (L * L);
+        this.random = new Random();
         regenerateParticles();
     }
 
@@ -87,9 +89,9 @@ public final class Simulation {
         final double velocity = 0.03;
 
         for (int i = 0; i < N; i++) {
-            double currentX = new Random().nextDouble() * L; // Random X position within L
-            double currentY = new Random().nextDouble() * L; // Random Y position within L
-            double thetaAngle = Math.toRadians(new Random().nextDouble() * 360); // randomize 0 to 360 degrees
+            double currentX = random.nextDouble() * L; // Random X position within L
+            double currentY = random.nextDouble() * L; // Random Y position within L
+            double thetaAngle = random.nextDouble() * 2.0 * Math.PI; // randomize 0 to 360 degrees
             Particle particle = new Particle(currentX, currentY, velocity, thetaAngle, i);
             particles.add(particle);
         }
@@ -259,7 +261,7 @@ public final class Simulation {
 
             // Delta Theta is a random number chosen with a uniform probability from the
             // interval [—theta/2, theta/2].
-            double noise = (Math.random() - 0.5) * this.nu;
+            double noise = (random.nextDouble() - 0.5) * this.nu;
             for(Particle neighbor: neighbors){
                 cosSum += Math.cos(neighbor.getThetaAngle());
                 sinSum += Math.sin(neighbor.getThetaAngle());
@@ -288,6 +290,7 @@ public final class Simulation {
         particles = updatedParticlesPositions;
     }
 
+    // check
     private void updatePositionsRandomNeighbour(){
         List<Particle> updatedParticlesPositions = new ArrayList<>(N);
         for(Particle particle: particles) {
