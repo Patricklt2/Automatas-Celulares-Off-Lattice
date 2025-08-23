@@ -66,7 +66,7 @@ public final class Simulation {
     }
 
     public void setL(int L){
-        this.L = N;
+        this.L = L;
     }
 
     public void setNu(double nu){
