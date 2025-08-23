@@ -28,7 +28,7 @@ class Particle:
 
 # ---------- Utilities ----------
 
-hdr = re.compile(r"^\s*t\s*:\s*\d+")
+hdr = re.compile(r"^\s*t\s*-\s*\d+")
 hdr_N = re.compile(r"^\s*N\s*:\s*\d+")
 hdr_L = re.compile(r"^\s*L\s*:\s*\d+")
 hdr_polarization = re.compile(r"^\s*polarization\s*:\s*([\d.,]+)\s*$")

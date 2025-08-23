@@ -84,7 +84,7 @@ public final class Simulation {
 
     private void writeParticleDataToFile(String fileName, int step, List<Particle> particles) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
-            writer.write("t:" + step + "\n");
+            writer.write("t - " + step + "\n");
             for (Particle particle : particles) {
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.append(particle.getId()).append(";")
@@ -436,13 +436,14 @@ public final class Simulation {
     public void runSimulationForAnimation(String filePath) {
         writeDataToFile(filePath, String.format("L:%d\n", L));
         writeDataToFile(filePath, String.format("N:%d\n", N));
+        writeDataToFile(filePath, String.format("nu:%.5f\n", nu));
+        writeDataToFile(filePath, String.format("density:%.5f\n", density));
         writeParticleDataToFile(filePath, 0, particles);
         for (int i = 1; i <= maxIterations; i++){
             findNeighbors();
             updatePositions(i);
             writeParticleDataToFile(filePath, i, particles);
         }
-        writeDataToFile(filePath, String.format("density:%.3f\n", density));
     }
 
     public void runSimulationForPolarization(String filePath, double nu) {
