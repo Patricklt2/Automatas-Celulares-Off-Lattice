@@ -106,9 +106,8 @@ def plot_avg_polarization():
     else:
         plt.plot(x, y, marker='o')
 
-    plt.xlabel('Nu')
-    plt.ylabel('Average Polarization')
-    plt.title('Average Polarization vs Nu (std)')
+    plt.xlabel('Ruido')
+    plt.ylabel('Polarización Media')
     plt.grid(True)
     plt.savefig(PLOT_PATH, dpi=150, bbox_inches='tight')
     ##plt.show()

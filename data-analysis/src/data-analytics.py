@@ -17,12 +17,12 @@ for file_name in data_files:
 
     x_range = list(range(len(data)))
 
-    plt.plot(x_range, data, label='Línea continua')
-    plt.scatter(x_range, data, color='red', s=10, label='Puntos')
-    plt.xlabel('Tiempo')
-    plt.ylabel('Va')
-    plt.title(f'Gráfico de datos')
+    plt.plot(x_range, data)
+    plt.scatter(x_range, data, color='red', s=10)
+    plt.xlabel('Tiempo (s)')
+    plt.ylabel('V_a(t)')
+    plt.title(f'Gráfico de polarización respecto del tiempo')
     plt.legend()
-    plt.savefig('../results/plo-v-time-' + file_name + '.png')
+    plt.savefig('../results/plot-v-time-' + file_name.replace('.txt', '') + '.png')
     #plt.show()
     plt.clf()
