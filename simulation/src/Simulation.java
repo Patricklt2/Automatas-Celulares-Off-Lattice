@@ -355,9 +355,7 @@ public final class Simulation {
     public void runSmoothPolarization(String filePath, double nu) {
         setNu(nu);
         int waste = (int) Math.floor(0.6*maxIterations);
-        int numRuns = 1;
-
-        double totalAveragePolarization = 0;
+        int numRuns = 7;
 
         for (int run = 0; run < numRuns; run++) {
             regenerateParticles(); 
@@ -372,13 +370,7 @@ public final class Simulation {
                 updatePositions();
                 writeDataToFile(filePath, String.format("%.5f\n", calculatePolarization()));
             }
-            
-            /* 
-            double runAverage = runSum / (maxIterations - waste);
-            totalAveragePolarization += runAverage;*/
         }
-        
-        //double finalPolarization = totalAveragePolarization / numRuns;
     }
 
 

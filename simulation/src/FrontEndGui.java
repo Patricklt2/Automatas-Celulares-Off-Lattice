@@ -180,9 +180,8 @@ public class FrontEndGui {
             executor.submit(() -> {
                 Simulation localSim = sim.clone();
                 String cFile = String.format("%s_nu_%.2f.txt", file.replace(".txt", ""), currentNu);
-                localSim.runSimulationForPolarization(cFile, currentNu);
+                localSim.runSmoothPolarization(cFile, currentNu);
             });
-            sim.regenerateParticles();
         }
 
         executor.shutdown();
